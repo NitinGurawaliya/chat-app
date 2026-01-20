@@ -32,6 +32,8 @@ ws.on("connection",(socket)=>{
 
 
     socket.on("message",(message)=>{
+
+        console.log("message received from frontned", message)
         //@ts-ignore
         const parsedMessage = JSON.parse(message)
 

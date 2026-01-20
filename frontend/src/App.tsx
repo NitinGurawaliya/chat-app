@@ -1,20 +1,44 @@
 
 import { useEffect, useState } from 'react'
-import './App.css'
 
 function App() {
 
 
   const [message, setMessage] = useState("")
+  const[messages,setMessages] = useState([""])
   const [socket,setSocket] = useState("")
+  const[roomId,setRoomId] = useState("")
 
   function sendMessage(){
 
     if(!socket){
       return;
     }
+
     //@ts-ignore
-    socket.send(message)
+    socket.send(JSON.stringify({
+      type:"chat",
+      payload:{
+        message:message
+      }
+    }))
+    
+    }
+
+    function joinRoom(){
+      if(!socket){
+        return;
+      }
+
+      //@ts-ignore
+      socket.send(JSON.stringify({
+        type:"join",
+        payload:{
+          roomId:roomId
+        }
+      }))
+
+
     }
 
   useEffect(()=>{
@@ -22,26 +46,45 @@ function App() {
 
     setSocket(ws)
     
-    ws.onmessage = (ev)=>{
-      alert(ev.data)
+    ws.onmessage = (event)=>{
+      setMessages(m=>[...m,event.data])
     }
-
-
   },[])
 
   
   return (
-    <div>
+    <div className='m-2'>
 
-      <div>chat app</div>
+      <div className='text-black'>chat app</div>
 
-      <input onChange={(e)=>{
-        setMessage(e.target.value)
-      }} />
+      <div>room </div>
 
-      <button onClick={sendMessage}>send message</button>
+      <div className='flex gap-2'>
+        <input
+        className='bg-black text-white rounded-sm p-2'
+         onChange={(e)=>{
+          setRoomId(e.target.value)
+        }} placeholder='enter room id to join' />
 
+        <button className='bg-black text-white rounded-md p-2'
+         onClick={joinRoom}>
+          join room 
+        </button>
 
+      </div>
+
+      <div className='flex gap-2 m-2'>
+        <input
+        className='bg-black text-white rounded-sm p-2'
+         placeholder='enter message to send ' onChange={(e)=>{
+          setMessage(e.target.value)
+        }} />
+
+        <button className='bg-black text-white rounded-md p-2'
+        onClick={sendMessage}>send message</button>
+      </div>
+
+      <div>{messages.map(message=><div>{message}</div>)}</div>
     </div>
 
   )
